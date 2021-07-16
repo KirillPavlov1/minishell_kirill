@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-static void count_argv2(char *line, int *i, int *k)
+static void count_argv2(char *line, int *i, int *k, int *c)
 {        
     if (line[*i] == '\"')
     {
@@ -29,18 +29,41 @@ static void count_argv2(char *line, int *i, int *k)
         }
         *k = 1;
     }
+    if (line[*i] == '>' || line[*i] == '<')
+    {
+            if (line[*i] == '>')
+            {
+                (*i)++;
+                if (line[*i - 1] == '>' && line[*i] == '>')
+                {
+                    (*i)++;
+                }
+                (*c)++;
+            }
+            if (line[*i] == '<')
+            {
+                (*i)++;
+                if (line[*i - 1] == '<' && line[*i] == '<')
+                {
+                    (*i)++;
+                }
+                (*c)++;
+            }
+    }
 }
 
 static int count_argv(char *line, int i)
 {
     int n;
     int k;
+    int c;
 
     n = 0;
     k = 0;
+    c = 0;
     while (line[i] && line[i] != '|')
     {
-        while (line[i] == ' ' || line[i] == '>' || line[i] == '<')
+        while (line[i] == ' ')
             i++;
         if (line[i] == '\'')
         {
@@ -49,18 +72,24 @@ static int count_argv(char *line, int i)
             if (line[i] == '\'')
                 i++;
         }
-        count_argv2(line, &i, &k);
+        count_argv2(line, &i, &k, &c);
         if (k)
             n++;
         k = 0;
     }
+    n = n - c;
+    if (n < 0)
+        n = 0;
     return (n);
 }
 
 void parse_line2(char *line, int *i, int *m, t_all **all)
 {
         while (line[*i] == ' ')
+        {
             (*i)++;
+            (*all)->f = 0;
+        }
         if ((*all)->f == 0)
         {
             (*m)++;
@@ -76,7 +105,7 @@ void parse_line2(char *line, int *i, int *m, t_all **all)
             }
             if (line[*i] == '\'')
                 (*i)++;
-            (*m)++;
+            //(*m)++;
         }
 }
 
@@ -119,7 +148,7 @@ void parse_line3(char *line, int *i, int *m, t_all **all)
                 parse_line3_1(line, i, m, all);
             if (line[*i] == '\"')
                 (*i)++;
-            (*m)++;
+            //(*m)++;
         }
 }
 
@@ -190,41 +219,49 @@ void parse_line5_1(char *line, int *i, int *m, t_all **all)
                 (*all)->cmd->count = count_argv(line, *i);
                 (*all)->cmd->argv = (char**)malloc(sizeof(char*) * (*all)->cmd->count);
                 make_null(&(*all)->cmd->argv, (*all)->cmd->count);
-    }
-    if (line[*i] == '>' || line[*i] == '<')
-    {
-                printf("error, too much signs");
-                exit (0);
+                //(*all)->cmd->dir = NULL;
     }
 }
 
 void parse_line5(char *line, int *i, int *m, t_all **all)
 {
-        if (line[*i] == '>' || line[*i] == '<' || line[*i] == '|')
+    t_redirect *p;
+        if (line[*i] == '>' || line[*i] == '<')
         {
+            redirect_back(&(*all)->cmd->dir, new_redirect());
+            p = (*all)->cmd->dir;
+            (*all)->cmd->dir = redirect_last((*all)->cmd->dir);
             if (line[*i] == '>')
             {
-                (*all)->cmd->dir.next = 1;
+                (*all)->cmd->dir->redirect = 1;
                 (*i)++;
                 if (line[*i - 1] == '>' && line[*i] == '>')
                 {
-                    (*all)->cmd->dir.next = 0;
-                    (*all)->cmd->dir.d_next = 1;
+                    (*all)->cmd->dir->redirect = 2;
                     (*i)++;
                 }
             }
             if (line[*i] == '<')
             {
-                (*all)->cmd->dir.back = 1;
+                (*all)->cmd->dir->redirect = 3;
                 (*i)++;
                 if (line[*i - 1] == '<' && line[*i] == '<')
                 {
-                    (*all)->cmd->dir.back = 0;
-                    (*all)->cmd->dir.d_back = 1;
+                    (*all)->cmd->dir->redirect = 4;
                     (*i)++;
                 }
             }
+            redirect2(line, i, all);
+            redirect3(line, i, all);
+            redirect4(line, i, all);\
+            if (!(*all)->to_red)
+                (*all)->to_red = ft_strdup("");
+            (*all)->cmd->dir->argv = ft_strdup((*all)->to_red);
+            free((*all)->to_red);
+            (*all)->cmd->dir = p;
+            (*all)->to_red = NULL;
         }
+        parse_line5_1(line, i, m, all);
 }
 
 void parse_line(char *line, t_all **all)
@@ -251,7 +288,8 @@ void parse_line(char *line, t_all **all)
         parse_line5(line, &i, &m, all);
     }
     (*all)->cmd = first;
-    (*all)->cmd->way = find_binary((*all)->cmd->argv[0], (*all)->path);
+    if(!(*all)->cmd->way)
+        (*all)->cmd->way = find_binary((*all)->cmd->argv[0], (*all)->path);
    // free(path);
 }
 

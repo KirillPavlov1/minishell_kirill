@@ -11,13 +11,19 @@ void output_all(t_all *all)
     {
         printf("------------------------------\n");
         printf("list%d:\n\n", n++);
-        printf("way = %s\n\n", all->cmd->way);
+       // printf("way = %s\n\n", all->cmd->way);
         while (++i < all->cmd->count)
             printf("argv[%d] = %s\n", i, all->cmd->argv[i]);
+        while(all->cmd->dir)
+        {
+            printf("redirect = %d\n", all->cmd->dir->redirect);
+            printf("argv = %s\n", all->cmd->dir->argv);
+            all->cmd->dir = all->cmd->dir->next;
+        }
         i = -1;
         printf("\n\n");
-        printf("redirect: \n\n<< - %d < - %d > - %d >> - %d\n\n",
-        all->cmd->dir.d_back, all->cmd->dir.back, all->cmd->dir.next, all->cmd->dir.d_next);
+        //printf("redirect: \n\n<< - %d < - %d > - %d >> - %d\n\n",
+        //all->cmd->dir.d_back, all->cmd->dir.back, all->cmd->dir.next, all->cmd->dir.d_next);
         all->cmd = all->cmd->next;
         printf("------------------------------\n\n");
     }
@@ -140,22 +146,23 @@ char   *find_binary(char *cmnd, char *paths)
 {
  char  *path;
  char  **arr;
- char  *tmp;
+ char  **tmp;
  struct stat buf;
 
  path = NULL;
  if (!cmnd || !paths)
   return NULL;
  arr = ft_split(paths, ':');
- tmp = *arr;
+ tmp = arr;
  cmnd = ft_strjoin("/", cmnd);
- while(tmp)
+ while(*tmp)
  {
-  path = ft_strjoin(tmp, cmnd);
+  path = ft_strjoin(*tmp, cmnd);
   if (stat(path, &buf) == 0)
    break;
   free(path);
-  (tmp)++;
+  path = NULL;
+  tmp++;
  }
  free(cmnd);
  clear_arr_2x(arr);

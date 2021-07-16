@@ -8,19 +8,18 @@
 #include <errno.h>
 #include "libft/libft.h"
 #include <sys/stat.h>
-struct redirect{
-	int d_back;
-	int d_next;
-	int next;
-	int back;
-};
+typedef struct			s_redirect{
+	int					redirect;
+	char				*argv;
+	struct s_redirect	*next;
+}						t_redirect;
 
 typedef struct			s_cmd
 {
 	char				*way;
 	char				**argv;
 	int					count;
-	struct redirect		dir;
+	t_redirect			*dir;
 	struct s_cmd		*next;
 }						t_cmd;
 
@@ -32,6 +31,7 @@ typedef struct			s_all
 	t_cmd				*cmd;
 	int					f;
 	char				*old;
+	char				*to_red;
 }						t_all;
 
 
@@ -52,3 +52,9 @@ char					*try_find(char *path, char **env);
 void					output_all(t_all *all);
 char					*find_binary(char *cmnd, char *paths);
 void					find_path(t_all **all);
+void					redirect_back(t_redirect **lst, t_redirect *new);
+t_redirect				*new_redirect();
+t_redirect				*redirect_last(t_redirect *lst);
+void redirect2(char *line, int *i, t_all **all);
+void redirect3(char *line, int *i, t_all **all);
+void redirect4(char *line, int *i, t_all **all);

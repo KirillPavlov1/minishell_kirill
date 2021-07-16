@@ -69,8 +69,8 @@ int main(int argc, char const *argv[], char *env[])
     signal(SIGINT, wait_signal);
     all = malloc(sizeof(t_all));
     all->my_env = copy_env(env);
-    //parse_line("echo wqdqw", &all);
-    //output_all(all);
+   // parse_line("dkl2kld1kml2 1d§;12dko;c 'qdqdwwc2 \"eqqwd 2d\"12d2d' dq,l1od > 1d2d1 < 1132", &all);
+   // output_all(all);
     line = readline("bash-3.2$ ");
     if (!line)
         ctrl_D();

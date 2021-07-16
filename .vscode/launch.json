@@ -12,7 +12,9 @@
             "args": [],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
-            "environment": [],
+            "environment": [
+                {"name":"AWS_REGION", "value":"us-east-1"},
+                {"name":"SLS_DEBUG", "value":"*"}],
             "externalConsole": false,
             "MIMode": "lldb"
         },

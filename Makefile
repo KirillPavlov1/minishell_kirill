@@ -12,9 +12,9 @@
 
 NAME = my_bash
 
-SRC = main.c parser.c ft_list.c utils.c
+SRC = main.c parser.c ft_list.c utils.c add_redirect.c
 
-OBJ = main.o parser.o ft_list.o utils.o
+OBJ = main.o parser.o ft_list.o utils.o add_redirect.o
 
 INCLUDE = minishell.h
 
