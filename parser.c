@@ -90,7 +90,7 @@ void parse_line2(char *line, int *i, int *m, t_all **all)
             (*i)++;
             (*all)->f = 0;
         }
-        if ((*all)->f == 0)
+        if ((*all)->f == 0 && (*all)->cmd->argv[*m] != NULL)
         {
             (*m)++;
             (*all)->f = 1;
@@ -191,6 +191,8 @@ void parse_line4(char *line, int *i, int *m, t_all **all)
                    (*all)->cmd->argv[*m] = ft_realloc((*all)->cmd->argv[*m], ft_strlen2((*all)->cmd->argv[*m]) + 2);
                    (*all)->cmd->argv[*m] = str_add_to_end((*all)->cmd->argv[*m], line[*i]);
                 }
+                 if (line[*i] == '\'')
+                    (*i)++;
             }
             else if (line[*i] == '\"')
             {
@@ -199,6 +201,8 @@ void parse_line4(char *line, int *i, int *m, t_all **all)
                     (*all)->cmd->argv[*m] = ft_realloc((*all)->cmd->argv[*m], ft_strlen2((*all)->cmd->argv[*m]) + 2);
                     (*all)->cmd->argv[*m] = str_add_to_end((*all)->cmd->argv[*m], line[*i]);
                 }
+                if (line[*i] == '\"')
+                    (*i)++;
             }
             else
                 parse_line4_1(line, i, m, all);
@@ -209,7 +213,7 @@ void parse_line5_1(char *line, int *i, int *m, t_all **all)
 {
     if (line[*i] == '|')
     {
-                *m = -1;
+                *m = 0;
                 (*all)->path = try_find(ft_strdup("PATH"), (*all)->my_env);
                 (*all)->cmd->way = find_binary((*all)->cmd->argv[0], (*all)->path);
                 ft_listadd_back(&(*all)->cmd, ft_listnew());
@@ -219,7 +223,7 @@ void parse_line5_1(char *line, int *i, int *m, t_all **all)
                 (*all)->cmd->count = count_argv(line, *i);
                 (*all)->cmd->argv = (char**)malloc(sizeof(char*) * (*all)->cmd->count);
                 make_null(&(*all)->cmd->argv, (*all)->cmd->count);
-                //(*all)->cmd->dir = NULL;
+                (*all)->to_red = NULL;
     }
 }
 
@@ -272,7 +276,7 @@ void parse_line(char *line, t_all **all)
 
     (*all)->dollar = NULL;
     i = 0;
-    m = -1;
+    m = 0;
     (*all)->f = 0;
     (*all)->cmd = ft_listnew();
     first = (*all)->cmd;
